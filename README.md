@@ -28,7 +28,7 @@ A Bluetooth Low Energy (BLE) scanner with advanced Resolvable Private Address (R
 ## Installation
 
 ```bash
-git clone https://github.com/trustedsec/btrpa-scan.git
+git clone https://github.com/hackingdave/btrpa-scan.git
 cd btrpa-scan
 pip install bleak cryptography
 ```
