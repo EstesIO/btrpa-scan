@@ -57,6 +57,14 @@ _ENV_PATH_LOSS = {
     "indoor": 3.0,
 }
 
+# Default reference-RSSI offset (dB) subtracted from TX Power to estimate
+# the expected RSSI at the 1-metre reference distance.  The theoretical
+# free-space path loss at 1 m for 2.4 GHz is ~41 dB, but real BLE devices
+# add ~18 dB of antenna inefficiency, enclosure loss, and polarisation
+# mismatch.  The iBeacon standard uses -59 dBm at 1 m for 0 dBm TX,
+# which corresponds to an offset of 59.
+_DEFAULT_REF_OFFSET = 59
+
 _FIELDNAMES = [
     "timestamp", "address", "name", "rssi", "avg_rssi", "tx_power",
     "est_distance", "latitude", "longitude", "gps_altitude",
@@ -173,7 +181,8 @@ class BLEScanner:
                  log_file: Optional[str] = None,
                  tui: bool = False,
                  adapters: Optional[List[str]] = None,
-                 gps: bool = True):
+                 gps: bool = True,
+                 ref_rssi: Optional[int] = None):
         self.target_mac = target_mac.upper() if target_mac else None
         self.targeted = target_mac is not None
         self.timeout = timeout
@@ -213,6 +222,8 @@ class BLEScanner:
         self._tui_start = 0.0
         # Multi-adapter
         self.adapters = adapters
+        # Reference RSSI calibration
+        self.ref_rssi = ref_rssi
         # GPS
         self._gps = GpsdReader() if gps else None
         self.device_best_gps: Dict[str, dict] = {}
@@ -231,7 +242,8 @@ class BLEScanner:
         rssi = adv.rssi
         tx_power = adv.tx_power
         rssi_for_dist = avg_rssi if avg_rssi is not None else rssi
-        dist = _estimate_distance(rssi_for_dist, tx_power, self.environment)
+        dist = _estimate_distance(rssi_for_dist, tx_power, self.environment,
+                                  ref_rssi=self.ref_rssi)
 
         mfr_data = ""
         if adv.manufacturer_data:
@@ -325,7 +337,8 @@ class BLEScanner:
         rssi = adv.rssi
         tx_power = adv.tx_power
         rssi_for_dist = avg_rssi if avg_rssi is not None else rssi
-        dist = _estimate_distance(rssi_for_dist, tx_power, self.environment)
+        dist = _estimate_distance(rssi_for_dist, tx_power, self.environment,
+                                  ref_rssi=self.ref_rssi)
 
         print(f"\n{'='*60}")
         print(f"  {label}")
@@ -741,20 +754,26 @@ class BLEScanner:
 
 
 def _estimate_distance(rssi: int, tx_power: Optional[int],
-                       env: str = "free_space") -> Optional[float]:
+                       env: str = "free_space",
+                       ref_rssi: Optional[int] = None) -> Optional[float]:
     """Estimate distance in meters using the log-distance path loss model.
 
-    BLE advertisements report *transmit power at the antenna* (e.g. +4 dBm),
-    but the path-loss formula requires the expected RSSI at the 1-meter
-    reference distance.  We convert by subtracting the free-space path loss
-    at 1 m for 2.4 GHz (~41 dB):  measured_power = tx_power - 41.
+    When *ref_rssi* is provided it is used directly as the expected RSSI at
+    the 1-metre reference distance (measured_power), ignoring *tx_power*.
+    Otherwise we derive measured_power from *tx_power* by subtracting
+    ``_DEFAULT_REF_OFFSET`` (59 dB) — the empirically validated offset used
+    by the iBeacon standard that accounts for free-space path loss plus
+    typical BLE antenna/enclosure losses.
     """
-    if tx_power is None:
-        return None
     if rssi == 0:
         return None
+    if ref_rssi is not None:
+        measured_power = ref_rssi
+    elif tx_power is not None:
+        measured_power = tx_power - _DEFAULT_REF_OFFSET
+    else:
+        return None
     n = _ENV_PATH_LOSS.get(env, 2.0)
-    measured_power = tx_power - 41  # estimated RSSI at 1 m for BLE 2.4 GHz
     return 10 ** ((measured_power - rssi) / (10 * n))
 
 
@@ -889,6 +908,14 @@ def main():
              "free_space (n=2.0), outdoor (n=2.2), indoor (n=3.0). "
              "Default: free_space"
     )
+    parser.add_argument(
+        "--ref-rssi", type=int, default=None, metavar="DBM",
+        help="Calibrated RSSI (dBm) measured at 1 metre from the target "
+             "device. When set, this value is used directly for distance "
+             "estimation instead of deriving it from TX Power. "
+             "Also enables distance estimates for devices that don't "
+             "advertise TX Power"
+    )
 
     # Proximity alerts
     parser.add_argument(
@@ -990,6 +1017,7 @@ def main():
         tui=args.tui,
         adapters=adapters,
         gps=not args.no_gps,
+        ref_rssi=args.ref_rssi,
     )
 
     def handle_signal(*_):

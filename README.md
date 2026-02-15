@@ -73,8 +73,8 @@ usage: btrpa-scan.py [-h] [-a] [--irk HEX] [-t TIMEOUT]
                      [--output {csv,json,jsonl}] [-o FILE] [--log FILE]
                      [-v | -q] [--min-rssi DBM] [--rssi-window N] [--active]
                      [--environment {free_space,indoor,outdoor}]
-                     [--alert-within METERS] [--tui] [--no-gps]
-                     [--adapters LIST] [mac]
+                     [--ref-rssi DBM] [--alert-within METERS] [--tui]
+                     [--no-gps] [--adapters LIST] [mac]
 
 BLE Scanner — discover all devices or hunt for a specific one
 
@@ -98,6 +98,7 @@ optional arguments:
   --active              Use active scanning (sends SCAN_REQ for additional data)
   --environment {free_space,indoor,outdoor}
                         Distance estimation path-loss model (default: free_space)
+  --ref-rssi DBM        Calibrated RSSI at 1 metre for distance estimation
   --alert-within METERS Proximity alert when device is within this distance
   --tui                 Live-updating terminal table instead of scrolling output
   --no-gps              Disable GPS location stamping (GPS is on by default via gpsd)
@@ -186,6 +187,20 @@ python3 btrpa-scan.py --all --environment indoor
 | `indoor` | 3.0 | Offices, homes, buildings |
 
 Higher `n` values produce larger distance estimates for the same RSSI, reflecting signal attenuation from walls and obstacles.
+
+### Reference RSSI Calibration
+
+By default btrpa-scan derives the expected RSSI at 1 metre from the advertised TX Power using an empirically validated 59 dB offset (the iBeacon standard). For even better accuracy you can supply a calibrated value measured in your own environment:
+
+1. Place the target device exactly 1 metre from the scanner.
+2. Run a short scan and note the average RSSI.
+3. Pass that value with `--ref-rssi`:
+
+```bash
+python3 btrpa-scan.py --all --ref-rssi -55
+```
+
+When `--ref-rssi` is set, TX Power is ignored entirely. This also enables distance estimates for devices that don't advertise TX Power.
 
 ### Proximity Alerts
 
