@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>btrpa-scan-lora Web Flasher</title>
+    <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 16px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            color: #2d3748;
+            font-size: 24px;
+            margin-bottom: 16px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+
+        .instructions {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 12px;
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        .config-form {
+            background: #f7fafc;
+            padding: 24px;
+            border-radius: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .mac-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .mac-input-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .mac-input-group input {
+            flex: 1;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #38a169;
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+
+        esp-web-install-button {
+            display: block;
+            margin: 0 auto;
+        }
+
+        .flash-section {
+            text-align: center;
+            padding: 32px;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+
+        .alert {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-info {
+            background: #bee3f8;
+            border-left: 4px solid #3182ce;
+            color: #2c5282;
+        }
+
+        .alert-warning {
+            background: #feebc8;
+            border-left: 4px solid #dd6b20;
+            color: #7c2d12;
+        }
+
+        .code {
+            background: #2d3748;
+            color: #68d391;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            color: #718096;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 btrpa-scan-lora</h1>
+            <p class="subtitle">BLE Detection Mesh Network - Web Flasher & Configuration</p>
+        </header>
+
+        <!-- Instructions Section -->
+        <section class="section">
+            <h2>📋 Quick Start Guide</h2>
+            <div class="instructions">
+                <ol>
+                    <li><strong>Connect your Heltec device</strong> to your computer via USB</li>
+                    <li><strong>Enter target MAC address(es)</strong> below (from phone app disconnect events or known device MACs)</li>
+                    <li><strong>Click "Connect & Flash"</strong> and select your device's serial port</li>
+                    <li><strong>Wait for flashing to complete</strong> (1-2 minutes)</li>
+                    <li><strong>Deploy the device</strong> - it will scan immediately upon power-on</li>
+                </ol>
+            </div>
+
+            <div class="alert alert-info">
+                <strong>💡 Browser Requirement:</strong> This flasher requires <strong>Chrome</strong>, <strong>Edge</strong>, or <strong>Opera</strong> browser with Web Serial API support.
+            </div>
+        </section>
+
+        <!-- Configuration Section -->
+        <section class="section">
+            <h2>⚙️ Target MAC Configuration</h2>
+            <div class="config-form">
+                <div class="form-group">
+                    <label>Node ID (optional):</label>
+                    <input type="text" id="nodeId" placeholder="NODE-001" value="NODE-001">
+                    <small style="color: #718096; display: block; margin-top: 4px;">
+                        Unique identifier for this node (e.g., NODE-001, NODE-002, etc.)
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label>Target MAC Addresses (TRUE HIT):</label>
+                    <small style="color: #718096; display: block; margin-bottom: 8px;">
+                        Enter MAC addresses to detect. Format: <span class="code">aa:bb:cc:dd:ee:ff</span> (lowercase, colon-separated)
+                    </small>
+                    <div class="mac-list" id="macList">
+                        <div class="mac-input-group">
+                            <input type="text" class="mac-input" placeholder="aa:bb:cc:dd:ee:ff" value="28:34:ff:74:aa:99">
+                            <button class="btn btn-danger" onclick="removeMACInput(this)">Remove</button>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="addMACInput()">+ Add Another MAC</button>
+                </div>
+
+                <button class="btn btn-primary" onclick="downloadConfig()" style="width: 100%; margin-top: 20px;">
+                    💾 Download config.h
+                </button>
+                <small style="color: #718096; display: block; margin-top: 8px; text-align: center;">
+                    Download this file and place it in the <span class="code">include/</span> folder before flashing
+                </small>
+            </div>
+        </section>
+
+        <div class="alert alert-warning">
+            <strong>⚠️ Important:</strong> After downloading <span class="code">config.h</span>, you must rebuild the firmware with PlatformIO before flashing. See documentation below.
+        </div>
+
+        <!-- Flash Section -->
+        <section class="section">
+            <h2>⚡ Flash Firmware</h2>
+            <div class="flash-section">
+                <p style="margin-bottom: 20px; color: #4a5568;">
+                    Connect your Heltec WiFi LoRa 32 V3 device and click the button below
+                </p>
+                <esp-web-install-button
+                    manifest="./manifest.json"
+                >
+                    <button class="btn btn-primary" slot="activate" style="font-size: 18px; padding: 16px 32px;">
+                        🔌 Connect & Flash Firmware
+                    </button>
+                </esp-web-install-button>
+            </div>
+        </section>
+
+        <!-- Advanced Documentation -->
+        <section class="section">
+            <h2>📚 Advanced: Manual Build & Flash</h2>
+            <div class="instructions">
+                <p style="margin-bottom: 12px;"><strong>If you need to customize beyond MAC addresses:</strong></p>
+                <ol>
+                    <li>Download the configuration file above</li>
+                    <li>Place it in <span class="code">firmware/btrpa-scan-lora/include/config.h</span></li>
+                    <li>Open terminal and navigate to <span class="code">firmware/btrpa-scan-lora/</span></li>
+                    <li>Run: <span class="code">pio run --target upload</span></li>
+                    <li>Wait for build and flash to complete</li>
+                </ol>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <p>btrpa-scan-lora v1.0 | Built for Search & Rescue Operations</p>
+            <p style="margin-top: 8px;">Based on <a href="https://github.com/TrustedSec/btrpa-scan" target="_blank" style="color: #667eea;">btrpa-scan</a> by @HackingDave</p>
+        </footer>
+    </div>
+
+    <script>
+        function addMACInput() {
+            const macList = document.getElementById('macList');
+            const newInput = document.createElement('div');
+            newInput.className = 'mac-input-group';
+            newInput.innerHTML = `
+                <input type="text" class="mac-input" placeholder="aa:bb:cc:dd:ee:ff">
+                <button class="btn btn-danger" onclick="removeMACInput(this)">Remove</button>
+            `;
+            macList.appendChild(newInput);
+        }
+
+        function removeMACInput(button) {
+            const macList = document.getElementById('macList');
+            if (macList.children.length > 1) {
+                button.parentElement.remove();
+            } else {
+                alert('At least one MAC address is required');
+            }
+        }
+
+        function downloadConfig() {
+            const nodeId = document.getElementById('nodeId').value || 'NODE-001';
+            const macInputs = document.querySelectorAll('.mac-input');
+            const macs = Array.from(macInputs)
+                .map(input => input.value.trim())
+                .filter(mac => mac.length > 0);
+
+            if (macs.length === 0) {
+                alert('Please enter at least one target MAC address');
+                return;
+            }
+
+            // Validate MAC addresses
+            const macRegex = /^([0-9a-f]{2}:){5}[0-9a-f]{2}$/i;
+            for (const mac of macs) {
+                if (!macRegex.test(mac)) {
+                    alert(`Invalid MAC address format: ${mac}\nPlease use format: aa:bb:cc:dd:ee:ff (lowercase, colon-separated)`);
+                    return;
+                }
+            }
+
+            // Generate config.h content
+            const configContent = `/**
+ * btrpa-scan-lora Configuration
+ *
+ * Edit this file to configure your node before flashing
+ */
+
+#ifndef CONFIG_H
+#define CONFIG_H
+
+// ============================================================================
+// NODE CONFIGURATION
+// ============================================================================
+
+// Unique node identifier (max 16 chars)
+// Change this for each node: NODE-001, NODE-002, etc.
+#define NODE_ID_CONFIG "${nodeId}"
+
+// ============================================================================
+// TARGET MAC ADDRESSES (TRUE HIT)
+// ============================================================================
+
+// Add your target MAC addresses here (exact matches)
+// Format: "aa:bb:cc:dd:ee:ff" (lowercase, colon-separated)
+
+const char* TARGET_MACS[] = {
+${macs.map(mac => `    "${mac.toLowerCase()}",  // Target device`).join('\n')}
+};
+
+const int NUM_TARGET_MACS = sizeof(TARGET_MACS) / sizeof(TARGET_MACS[0]);
+
+// ============================================================================
+// MEDICAL DEVICE PREFIXES (POSSIBLE HIT)
+// ============================================================================
+
+// Enable medical device prefix scanning
+#define ENABLE_MEDICAL_DEVICE_SCANNING true
+
+// Medical device MAC prefixes database
+struct MedicalDevicePrefixConfig {
+    const char* prefix;
+    const char* deviceType;
+    const char* manufacturer;
+};
+
+const MedicalDevicePrefixConfig MEDICAL_DEVICE_PREFIXES[] = {
+    // Medtronic Cardiac Devices
+    {"70:b3:d5:b3:4", "Pacemaker/ICD/CRT", "Medtronic"},
+
+    // TODO: Add more medical device prefixes as research progresses
+};
+
+const int NUM_MEDICAL_PREFIXES = sizeof(MEDICAL_DEVICE_PREFIXES) / sizeof(MEDICAL_DEVICE_PREFIXES[0]);
+
+// ============================================================================
+// BLE SCANNING PARAMETERS
+// ============================================================================
+
+#define BLE_SCAN_INTERVAL 500    // milliseconds
+#define BLE_SCAN_WINDOW 450      // milliseconds (must be <= interval)
+#define BLE_SCAN_DURATION 0      // 0 for continuous
+#define BLE_ACTIVE_SCAN true     // Active scanning for better range
+
+// ============================================================================
+// GPS CONFIGURATION
+// ============================================================================
+
+#define GPS_MOVEMENT_THRESHOLD 25.0  // meters
+#define GPS_INIT_TIMEOUT 2000        // milliseconds
+
+// ============================================================================
+// ALERT CONFIGURATION
+// ============================================================================
+
+#define BUZZER_PIN 13
+
+// TRUE HIT alert
+#define TRUE_HIT_FREQUENCY 2000
+#define TRUE_HIT_DURATION 200
+#define TRUE_HIT_BEEPS 3
+#define TRUE_HIT_DELAY 250
+
+// POSSIBLE HIT alert
+#define POSSIBLE_HIT_FREQUENCY 1500
+#define POSSIBLE_HIT_DURATION 300
+#define POSSIBLE_HIT_BEEPS 2
+#define POSSIBLE_HIT_DELAY 500
+
+// ============================================================================
+// LORA MESH CONFIGURATION
+// ============================================================================
+
+#define LORA_FREQUENCY 915     // MHz (US: 915, EU: 868, Asia: 923)
+#define LORA_TX_POWER 20       // dBm
+#define MESH_CHANNEL_NAME "SAR-SEARCH"
+
+// ============================================================================
+// HARDWARE PIN DEFINITIONS
+// ============================================================================
+
+#if defined(HELTEC_V3)
+    #define GPS_RX_PIN 37
+    #define GPS_TX_PIN 38
+    #define LED_PIN 35
+#elif defined(HELTEC_V2)
+    #define GPS_RX_PIN 17
+    #define GPS_TX_PIN 16
+    #define LED_PIN 25
+#endif
+
+// ============================================================================
+// DEBUG CONFIGURATION
+// ============================================================================
+
+#define DEBUG_VERBOSE false
+#define DEBUG_SHOW_ALL_DEVICES false
+#define STATS_INTERVAL 30000    // milliseconds
+
+#endif // CONFIG_H
+`;
+
+            // Create download
+            const blob = new Blob([configContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'config.h';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            alert('config.h downloaded!\n\nNext steps:\n1. Place this file in firmware/btrpa-scan-lora/include/\n2. Rebuild firmware: pio run\n3. Flash using the button above');
+        }
+    </script>
+</body>
+</html>
