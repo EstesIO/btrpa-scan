@@ -154,8 +154,8 @@ This repository contains multiple components. **Start here based on your goal:**
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/EstesIO/btrpa-scan-LoraMesh.git
-cd btrpa-scan-LoraMesh/firmware/btrpa-scan-lora
+git clone https://github.com/EstesIO/btrpa-scan-MeshBeacon.git
+cd btrpa-scan-MeshBeacon/firmware/btrpa-scan-lora
 
 # 2. Configure target MAC address (the missing person's device)
 # Edit include/config.h with pacemaker/phone MAC
@@ -491,7 +491,7 @@ optional arguments:
 
 ## 📞 Contact & Support
 
-**Project Repository:** https://github.com/EstesIO/btrpa-scan-LoraMesh
+**Project Repository:** https://github.com/EstesIO/btrpa-scan-MeshBeacon
 **Author:** Grayson Estes (grayson@estes.io)
 **Original btrpa-scan:** https://github.com/TrustedSec/btrpa-scan
 

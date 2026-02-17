@@ -3,7 +3,7 @@
 **Document Version:** 1.0  
 **Date:** February 16, 2026  
 **Author:** Grayson Estes  
-**Project Repository:** https://github.com/EstesIO/btrpa-scan-LoraMesh  
+**Project Repository:** https://github.com/EstesIO/btrpa-scan-MeshBeacon  
 **Classification:** Open Source
 
 ---
@@ -873,7 +873,7 @@ Path 3 (If Node 4 fails): Node 10 → Node 11 → Node 5 → Node 2 → Command 
 - [ESP32-S3 Technical Reference Manual](https://www.espressif.com/sites/default/files/documentation/esp32-s3_technical_reference_manual_en.pdf)
 
 ### Software & Firmware
-- [btrpa-scan-LoraMesh GitHub Repository](https://github.com/EstesIO/btrpa-scan-LoraMesh)
+- [btrpa-scan-MeshBeacon GitHub Repository](https://github.com/EstesIO/btrpa-scan-MeshBeacon)
 - [Meshtastic Firmware](https://meshtastic.org/)
 - [Heltec ESP32 Arduino Framework](https://github.com/Heltec-Aaron-Lee/WiFi_Kit_series)
 
