@@ -1876,7 +1876,7 @@ def main():
     # Default timeout
     if args.timeout is not None:
         timeout = args.timeout
-    elif irks:
+    elif irks or args.gui:
         timeout = float('inf')
     else:
         timeout = 30.0
