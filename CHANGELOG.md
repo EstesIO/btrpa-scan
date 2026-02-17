@@ -1,5 +1,31 @@
 # Changelog
 
+## [version 0.5]
+
+### New Features
+- **Web GUI (`--gui`)**: Browser-based radar interface with real-time BLE device visualization. Features include:
+  - Animated radar sweep with concentric distance rings (1m, 5m, 10m, 20m)
+  - Device dots color-coded by signal strength (green = close, yellow = medium, red = far) with pulse animations on new detections
+  - Interactive GPS map panel (Leaflet.js + OpenStreetMap) showing scanner position and device locations — auto-hidden when no GPS is available
+  - Sortable device table with address, name, RSSI, average RSSI, distance, seen count, and last seen time
+  - Hover tooltips with full device details (address, name, RSSI, TX power, distance, GPS, manufacturer data, service UUIDs)
+  - Dark "hacker aesthetic" theme with matrix-green accents
+  - "Scan Complete" overlay with summary stats
+  - Real-time updates via WebSocket (Flask + flask-socketio)
+- **`--gui-port PORT`**: Custom port for the GUI web server (default: 5000). Auto-increments if the port is busy.
+- **Continuous scanning in GUI mode**: `--gui` defaults to infinite scan duration (no 30-second timeout). Use `-t` to set a specific duration.
+
+### Dependencies
+- **Flask and flask-socketio**: Added `flask>=3.0.0` and `flask-socketio>=5.3.0` to `requirements.txt`. These are optional — only required when using `--gui`.
+
+### Tests
+- **GUI parameter tests**: Added 4 new tests for GUI parameter support (45 total tests).
+
+### Documentation
+- **README updated**: New Web GUI section with usage examples, feature list, and compatibility notes. Updated usage block and GPS section.
+
+---
+
 ## [version 0.4]
 
 ### Bug Fixes

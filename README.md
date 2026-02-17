@@ -17,6 +17,7 @@ A Bluetooth Low Energy (BLE) scanner with advanced Resolvable Private Address (R
 - **Active Scanning** - Send SCAN_REQ to get SCAN_RSP with additional service UUIDs and device names that passive scanning misses
 - **Environment Presets** - Indoor, outdoor, and free-space path-loss models for more accurate distance estimation
 - **Proximity Alerts** - Audible/visual alert when a device is estimated within a configurable distance
+- **Web GUI** - Browser-based radar interface with animated sweep, distance visualization, GPS map, device table, and hover tooltips
 - **Live TUI** - Curses-based live-updating table sorted by signal strength
 - **Real-Time CSV Log** - Stream each detection to a CSV file as it happens
 - **Batch Export** - Export results to CSV, JSON, or JSONL at end of scan (supports stdout with `-o -`)
@@ -76,7 +77,7 @@ usage: btrpa-scan.py [-h] [-a] [--irk HEX] [--irk-file PATH] [-t TIMEOUT]
                      [-v | -q] [--min-rssi DBM] [--rssi-window N] [--active]
                      [--environment {free_space,indoor,outdoor}]
                      [--ref-rssi DBM] [--name-filter PATTERN]
-                     [--alert-within METERS] [--tui]
+                     [--alert-within METERS] [--tui] [--gui] [--gui-port PORT]
                      [--no-gps] [--adapters LIST] [mac]
 
 BLE Scanner — discover all devices or hunt for a specific one
@@ -107,6 +108,8 @@ optional arguments:
   --name-filter PATTERN Filter devices by name (case-insensitive substring match)
   --alert-within METERS Proximity alert when device is within this distance
   --tui                 Live-updating terminal table instead of scrolling output
+  --gui                 Launch web-based radar interface in the browser
+  --gui-port PORT       Port for GUI web server (default: 5000)
   --no-gps              Disable GPS location stamping (GPS is on by default via gpsd)
   --adapters LIST       Comma-separated Bluetooth adapter names (e.g. hci0,hci1)
 ```
@@ -278,6 +281,37 @@ Combine with other flags:
 python3 btrpa-scan.py --irk <key> --tui --rssi-window 5 --environment indoor --alert-within 5.0
 ```
 
+### Web GUI
+
+Launch a browser-based radar interface with an animated sweep, real-time device tracking, and GPS map:
+
+```bash
+python3 btrpa-scan.py --all --gui
+```
+
+The GUI features:
+
+- **Radar display** — animated sweep line with concentric distance rings (1m, 5m, 10m, 20m). Devices appear as color-coded dots positioned by estimated distance (green = close, yellow = medium, red = far)
+- **GPS map** — Leaflet.js map with OpenStreetMap tiles showing scanner position and device locations. Automatically hidden if no GPS is available
+- **Device table** — sortable table with address, name, RSSI, distance, and detection count
+- **Hover tooltips** — hover over any radar dot or table row to see full device details (address, name, RSSI, TX power, distance, GPS, manufacturer data, services)
+- **Dark theme** — matrix-green hacker aesthetic designed for field work
+
+GUI mode scans continuously by default (no 30-second timeout). Press `Ctrl+C` to stop. Use `-t` to set a specific scan duration:
+
+```bash
+# Scan for 60 seconds with indoor path-loss model
+python3 btrpa-scan.py --all --gui -t 60 --environment indoor
+
+# Custom port
+python3 btrpa-scan.py --all --gui --gui-port 8080
+
+# Combine with RSSI averaging and proximity alerts
+python3 btrpa-scan.py --all --gui --rssi-window 5 --alert-within 5.0
+```
+
+> **Note:** `--gui` requires Flask and flask-socketio (`pip install flask flask-socketio`). Cannot be combined with `--tui` or `--quiet`.
+
 ### Real-Time CSV Log
 
 Stream each detection to a CSV file as it happens (useful for long-running scans where you want incremental data):
@@ -345,6 +379,7 @@ python3 btrpa-scan.py --all --no-gps
 GPS coordinates appear in:
 - **Console output** — "Best GPS" line per device
 - **TUI settings bar** — current fix coordinates
+- **GUI** — interactive map panel with device markers and scanner position
 - **Header** — GPS connection status
 - **Summary tables** — "Best GPS" column per device
 - **All exports** (CSV, JSON, JSONL, real-time log) — `latitude`, `longitude`, `gps_altitude` fields
